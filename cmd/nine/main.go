@@ -10,6 +10,7 @@ type Args struct {
 	Stat   *StatCmd   `arg:"subcommand:stat" help:"print path metadata"`
 	Rm     *RmCmd     `arg:"subcommand:rm" help:"remove path"`
 	Create *CreateCmd `arg:"subcommand:create" help:"create file at path"`
+	Write  *WriteCmd  `arg:"subcommand:write" help:"write to file at path"`
 }
 
 func (a *Args) Path() string {
@@ -24,6 +25,8 @@ func (a *Args) Path() string {
 		return a.Rm.Path
 	case a.Create != nil:
 		return a.Create.Path
+	case a.Write != nil:
+		return a.Write.Path
 	default:
 		return ""
 	}
@@ -45,6 +48,9 @@ func (a *Args) Exec() {
 
 	case a.Create != nil:
 		createCommand(a)
+
+	case a.Write != nil:
+		writeCommand(a)
 	}
 }
 
