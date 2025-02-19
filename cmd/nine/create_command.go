@@ -6,13 +6,19 @@ import (
 )
 
 type CreateCmd struct {
+	Dir  bool   `arg:"-d" help:"create directory instead of file"`
 	Path string `arg:"positional"`
 }
 
 func createCommand(args *Args) {
 	cli, path := NewClient(args)
 
-	f, err := cli.Create(path, 0o666)
+	perms := 0o666
+	if args.Create.Dir {
+		perms = 0o777 | DMDIR
+	}
+
+	f, err := cli.Create(path, os.FileMode(perms))
 	if err != nil {
 		fmt.Fprintf(os.Stderr, "could not create file at path '%s': %s\n", path, err)
 		os.Exit(1)
