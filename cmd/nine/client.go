@@ -35,6 +35,9 @@ func NewClient(args *Args) (*client.Client, string) {
 	if isUnix {
 		path = nineutils.PathForUnixClient(path)
 	}
+	if len(path) == 0 {
+		path = "/"
+	}
 	if path[0] != '/' {
 		path = fmt.Sprintf("/%s", path)
 	}
