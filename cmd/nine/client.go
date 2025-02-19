@@ -3,37 +3,41 @@ package main
 import (
 	"fmt"
 	"os"
-	"os/user"
 
 	"blurrycat.dev/nine/pkg/nineutils"
 	"github.com/knusbaum/go9p/client"
 )
 
-func getUsername() (string, error) {
-	currentUser, err := user.Current()
+func NewClient(args *Args) (*client.Client, string) {
+	username, _, err := nineutils.GetCurrentUser()
 	if err != nil {
-		return "", err
+		fmt.Fprintf(os.Stderr, "could not get current user: %s\n", err)
+		os.Exit(1)
 	}
 
-	return currentUser.Username, nil
-}
-
-func NewClient(args *Args) *client.Client {
-	username, err := getUsername()
-
 	var cli *client.Client
+	isUnix := false
+	path := args.Path()
 
 	switch args.Addr {
 	case "":
-		cli, err = nineutils.NewUnixClient(args.Ls.Path, username, "")
+		cli, err = nineutils.NewUnixClient(path, username, "")
+		isUnix = true
 	default:
 		cli, err = nineutils.NewTCPClient(args.Addr, username, "")
 	}
 
 	if err != nil {
-		fmt.Fprintf(os.Stderr, "could not connect to server: %s", err)
+		fmt.Fprintf(os.Stderr, "could not connect to server: %s\n", err)
 		os.Exit(1)
 	}
 
-	return cli
+	if isUnix {
+		path = nineutils.PathForUnixClient(path)
+	}
+	if path[0] != '/' {
+		path = fmt.Sprintf("/%s", path)
+	}
+
+	return cli, path
 }

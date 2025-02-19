@@ -33,5 +33,5 @@ func main() {
 
 	root.AddChild(greetDir)
 
-	go9p.PostSrv("utilfs", greetFS.Server())
+	go9p.PostSrv("greetfs", greetFS.Server())
 }
